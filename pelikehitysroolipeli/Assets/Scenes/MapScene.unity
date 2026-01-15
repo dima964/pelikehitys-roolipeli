@@ -3710,6 +3710,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4676876331704643884, guid: 3058de44444fdf84eb427c5438e475a7, type: 3}
+      propertyPath: m_Size.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4676876331704643884, guid: 3058de44444fdf84eb427c5438e475a7, type: 3}
+      propertyPath: m_Offset.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4676876331704643884, guid: 3058de44444fdf84eb427c5438e475a7, type: 3}
+      propertyPath: m_Offset.y
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 5505130291679756918, guid: 3058de44444fdf84eb427c5438e475a7, type: 3}
       propertyPath: DebugFontSize
       value: 32
@@ -3720,11 +3732,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9187837853789454956, guid: 3058de44444fdf84eb427c5438e475a7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9187837853789454956, guid: 3058de44444fdf84eb427c5438e475a7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 9187837853789454956, guid: 3058de44444fdf84eb427c5438e475a7, type: 3}
       propertyPath: m_LocalPosition.z
