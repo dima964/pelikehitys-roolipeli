@@ -3,6 +3,21 @@ using UnityEngine.Rendering;
 
 public class DoorController : MonoBehaviour
 {
+    public enum OvenTila
+    {
+        Auki,
+        Kiinni,
+        Lukittu
+    }
+
+    public enum Toiminto
+    {
+        Avaa,
+        Sulje,
+        Lukitse,
+        AvaaLukitus
+    }
+
     // Kuvat oven eri tiloille
     [SerializeField]
     Sprite ClosedDoorSprite;
@@ -15,49 +30,79 @@ public class DoorController : MonoBehaviour
 
     BoxCollider2D colliderComp;
 
-    // Näitä värejä käytetään lukkosymbolin piirtämiseen.
     public static Color lockedColor;
     public static Color openColor;
 
-    SpriteRenderer doorSprite; // Oven kuva
-    SpriteRenderer lockSprite; // Lapsi gameobjectissa oleva lukon kuva
+    SpriteRenderer doorSprite;
+    SpriteRenderer lockSprite;
 
-    // Debug ui
     [SerializeField]
     bool ShowDebugUI;
     [SerializeField]
     int DebugFontSize = 32;
 
 
+    private OvenTila nykyinenTila;
+
     void Start()
     {
         doorSprite = GetComponent<SpriteRenderer>();
         colliderComp = GetComponent<BoxCollider2D>();
+
         SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>();
         if (sprites.Length == 2 && sprites[0] == doorSprite)
         {
             lockSprite = sprites[1];
         }
 
-        
         lockedColor = new Color(1.0f, 0.63f, 0.23f);
         openColor = new Color(0.5f, 0.8f, 1.0f);
 
-
-         // TODO
-         // missä tilassa ovi on kun peli alkaa?
+        nykyinenTila = OvenTila.Kiinni;
+        CloseDoor();
+        UnlockDoor();
     }
 
     /// <summary>
     /// Oveen kohdistuu jokin toiminto joka muuttaa sen tilaa
     /// </summary>
-    public void ReceiveAction()
+    public void ReceiveAction(Toiminto toiminto)
     {
-        
-    }
+        switch (toiminto)
+        {
+            case Toiminto.Avaa:
+                if (nykyinenTila == OvenTila.Kiinni)
+                {
+                    OpenDoor();
+                    nykyinenTila = OvenTila.Auki;
+                }
+                break;
 
-    // Kun tulee toiminto, sen perusteella kutsutaan jotakin
-    // näistä funktioista että oven tila muuttuu
+            case Toiminto.Sulje:
+                if (nykyinenTila == OvenTila.Auki)
+                {
+                    CloseDoor();
+                    nykyinenTila = OvenTila.Kiinni;
+                }
+                break;
+
+            case Toiminto.Lukitse:
+                if (nykyinenTila == OvenTila.Kiinni)
+                {
+                    LockDoor();
+                    nykyinenTila = OvenTila.Lukittu;
+                }
+                break;
+
+            case Toiminto.AvaaLukitus:
+                if (nykyinenTila == OvenTila.Lukittu)
+                {
+                    UnlockDoor();
+                    nykyinenTila = OvenTila.Kiinni;
+                }
+                break;
+        }
+    }
 
     /// <summary>
     /// Vaihtaa oven kuvan avoimeksi oveksi
@@ -80,93 +125,82 @@ public class DoorController : MonoBehaviour
     }
 
     /// <summary>
-    /// Vaihtaa lukkosymbolin lukituksi ja
-    /// vaihtaa sen värin
+    /// Vaihtaa lukkosymbolin lukituksi
     /// </summary>
     private void LockDoor()
     {
-        lockSprite.sprite = LockedSprite;
-        lockSprite.color = lockedColor;
+        if (lockSprite != null)
+        {
+            lockSprite.sprite = LockedSprite;
+            lockSprite.color = lockedColor;
+        }
     }
 
     /// <summary>
-    /// Vaihtaa lukkosymbolin avatuksi ja
-    /// vaihtaa sen värin
+    /// Vaihtaa lukkosymbolin avatuksi
     /// </summary>
     private void UnlockDoor()
     {
-        lockSprite.sprite = UnlockedSprite;
-        lockSprite.color = openColor;
+        if (lockSprite != null)
+        {
+            lockSprite.sprite = UnlockedSprite;
+            lockSprite.color = openColor;
+        }
     }
 
-    // *********************************
-    // Unityssä on välittömän käyttöliittymän
-    // järjestelmä, jolla voi piirtää 
-    // nappeja ja tekstiä koodin avulla.
-    // Se on kätevä erilaisten oikoteiden ja
-    // testaamisen apuvälineiden kehittämiseen.
-    // Tässä sitä on käytetty tekemään napit, joilla
-    // voi testata että oven eri toiminnot
-    // toimivat oikein.
+    // -------- DEBUG UI --------
 
-
-  
-
-    // Unity kutsuu tätä funktiota kaiken muun piirtämisen jälkeen
-    // Sen sisällä voi piirtää käyttöliittymää
     private void OnGUI()
     {
         if (ShowDebugUI == false)
         {
             return;
         }
+
         GUIStyle buttonStyle = GUI.skin.GetStyle("button");
         GUIStyle labelStyle = GUI.skin.GetStyle("label");
         buttonStyle.fontSize = DebugFontSize;
         labelStyle.fontSize = DebugFontSize;
+
         Rect guiRect = GetGuiRect();
         GUILayout.BeginArea(guiRect);
-        
+
         GUILayout.Label("Door");
+
         if (GUILayout.Button("Open"))
         {
-            OpenDoor();
+            ReceiveAction(Toiminto.Avaa);
         }
+
         if (GUILayout.Button("Close"))
         {
-            CloseDoor();
+            ReceiveAction(Toiminto.Sulje);
         }
+
         if (GUILayout.Button("Lock"))
         {
-            LockDoor();
+            ReceiveAction(Toiminto.Lukitse);
         }
-        if (GUILayout.Button( "Unlock"))
+
+        if (GUILayout.Button("Unlock"))
         {
-            UnlockDoor();
+            ReceiveAction(Toiminto.AvaaLukitus);
         }
-        
+
         GUILayout.EndArea();
     }
-
-    // Näiden kahden funktion avulla ei tarvitse itse
-    // määrittää jokaisen napin paikkaa, vaan ne
-    // ladotaan automaattisesti allekkain.
-   
 
     private Rect GetGuiRect()
     {
         Vector3 buttonPos = transform.position;
         buttonPos.x += 1;
         buttonPos.y -= 0.25f;
-        // Tällä tavalla voi laskea paikan jossa GameObject näkyy
-        // ruudulla ja piirtää käyttöliittymän sen kohdalle.
-        // WorldToScreenPoint antaa Y koordinaatin väärin päin
-        // tai GUI koodi ymmärtää sen väärin,
-        // ja siksi se pitä vähentää ruudun korkeudesta.
+
         Vector3 screenPoint = Camera.main.WorldToScreenPoint(buttonPos);
         float screenHeight = Screen.height;
-        return new Rect(screenPoint.x, screenHeight - screenPoint.y, 
-            DebugFontSize * 8,  // Leveys ja korkeus niin että varmasti mahtuu
+
+        return new Rect(screenPoint.x, screenHeight - screenPoint.y,
+            DebugFontSize * 8,
             DebugFontSize * 100);
-    }    
+    }
 }

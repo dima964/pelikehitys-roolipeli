@@ -1,3 +1,4 @@
+ï»¿using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -8,44 +9,96 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D rb;
     [SerializeField]
     float moveSpeed;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    
+
+    [SerializeField] GameObject doorButtonsParent;
+
+    Button openButton;
+    Button closeButton;
+    Button lockButton;
+    Button unlockButton;
+
+    DoorController currentDoor;
+
     void Start()
     {
         lastMovement = Vector2.zero;
         rb = GetComponent<Rigidbody2D>();
 
-        Button openbutton = GameObject.Find("OpenButton").GetComponent<Button>();
-        openbutton.onClick.AddListener(OnOpenButton);
+        // ðŸ”¹ Hae napit vanhemman kautta (EI GameObject.Find piilotetuille)
+        openButton = doorButtonsParent.transform.Find("OpenButton").GetComponent<Button>();
+        closeButton = doorButtonsParent.transform.Find("CloseButton").GetComponent<Button>();
+        lockButton = doorButtonsParent.transform.Find("LockButton").GetComponent<Button>();
+        unlockButton = doorButtonsParent.transform.Find("UnlockButton").GetComponent<Button>();
+
+        openButton.onClick.AddListener(OnOpenButton);
+        closeButton.onClick.AddListener(OnCloseButton);
+        lockButton.onClick.AddListener(OnLockButton);
+        unlockButton.onClick.AddListener(OnUnlockButton);
+
+        // ðŸ”¹ Piilota napit alussa
+        doorButtonsParent.SetActive(false);
     }
 
     void OnOpenButton()
     {
-        Debug.Log("Open button was pressed");
+        UnityEngine.Debug.Log("Open button was pressed");
+
+        if (currentDoor != null)
+            currentDoor.ReceiveAction(DoorController.Toiminto.Avaa);
     }
 
-    // Update is called once per frame
+    void OnCloseButton()
+    {
+        if (currentDoor != null)
+            currentDoor.ReceiveAction(DoorController.Toiminto.Sulje);
+    }
+
+    void OnLockButton()
+    {
+        if (currentDoor != null)
+            currentDoor.ReceiveAction(DoorController.Toiminto.Lukitse);
+    }
+
+    void OnUnlockButton()
+    {
+        if (currentDoor != null)
+            currentDoor.ReceiveAction(DoorController.Toiminto.AvaaLukitus);
+    }
+
     void Update()
     {
-        
+
     }
 
     private void FixedUpdate()
     {
-
         rb.MovePosition(rb.position + lastMovement * moveSpeed * Time.fixedDeltaTime);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Huomaa mitä pelaaja löytää
+        // Huomaa mitÃ¤ pelaaja lÃ¶ytÃ¤Ã¤
         if (collision.CompareTag("Door"))
         {
-            Debug.Log("Found Door");
+            UnityEngine.Debug.Log("Found Door");
+
+            currentDoor = collision.GetComponent<DoorController>();
+
+            
+            doorButtonsParent.SetActive(true);
         }
         else if (collision.CompareTag("Merchant"))
         {
-            Debug.Log("Found Merchant");
+            UnityEngine.Debug.Log("Found Merchant");
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Door"))
+        {
+            currentDoor = null;
+            doorButtonsParent.SetActive(false);
         }
     }
 
@@ -53,5 +106,5 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 v = value.Get<Vector2>();
         lastMovement = v;
-    }    
+    }
 }
