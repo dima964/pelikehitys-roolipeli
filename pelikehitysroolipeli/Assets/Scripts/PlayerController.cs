@@ -74,6 +74,13 @@ public class PlayerController : MonoBehaviour
     {
         rb.MovePosition(rb.position + lastMovement * moveSpeed * Time.fixedDeltaTime);
     }
+    private void OnCollisionEnter2D(Collision2D collsion)
+    {
+        if (collsion.gameObject.CompareTag("Wall"))
+        {
+            AudioManager.Instance.PlaySound(SoundEffect.PlayerHitWall);
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -89,7 +96,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (collision.CompareTag("Merchant"))
         {
-            UnityEngine.Debug.Log("Found Merchant");
+            AudioManager.Instance.PlaySound(SoundEffect.PlayerFoundMerchant);
         }
     }
 

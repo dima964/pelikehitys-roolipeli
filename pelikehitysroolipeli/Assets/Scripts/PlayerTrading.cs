@@ -26,6 +26,7 @@ public class PlayerTrading : MonoBehaviour
         if (merchant != null)
         {
             currentMerchant = merchant;
+            AudioManager.Instance.PlaySound(SoundEffect.PlayerFoundMerchant);
             OpenMerchantUI();
         }
     }
@@ -87,10 +88,12 @@ public class PlayerTrading : MonoBehaviour
         if (PlayerDataManager.Instance.TakeMoney(cost))
         {
             UnityEngine.Debug.Log("Arrow purchased!");
+            AudioManager.Instance.PlaySound(SoundEffect.PlayerPurchase);
         }
         else
         {
             UnityEngine.Debug.Log("Not enough money!");
+            AudioManager.Instance.PlaySound(SoundEffect.PlayerActionFailed);
         }
     }
 
@@ -135,10 +138,12 @@ public class PlayerTrading : MonoBehaviour
         {
             PlayerDataManager.Instance.AddHealth(hpGain);
             UnityEngine.Debug.Log("Food purchased!");
+            AudioManager.Instance.PlaySound(SoundEffect.PlayerPurchase);
         }
         else
         {
             UnityEngine.Debug.Log("Not enough money!");
+            AudioManager.Instance.PlaySound(SoundEffect.PlayerActionFailed);
         }
     }
 }

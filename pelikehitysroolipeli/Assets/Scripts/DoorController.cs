@@ -75,14 +75,23 @@ public class DoorController : MonoBehaviour
                 {
                     OpenDoor();
                     nykyinenTila = OvenTila.Auki;
+                    AudioManager.Instance.PlaySound(SoundEffect.PlayerOpenDoor);
                 }
-                break;
+                else
+                {
+                    AudioManager.Instance.PlaySound(SoundEffect.PlayerActionFailed);
+                }
+                    break;
 
             case Toiminto.Sulje:
                 if (nykyinenTila == OvenTila.Auki)
                 {
                     CloseDoor();
                     nykyinenTila = OvenTila.Kiinni;
+                }
+                else
+                {
+                    AudioManager.Instance.PlaySound(SoundEffect.PlayerActionFailed);
                 }
                 break;
 
@@ -92,6 +101,10 @@ public class DoorController : MonoBehaviour
                     LockDoor();
                     nykyinenTila = OvenTila.Lukittu;
                 }
+                else
+                {
+                    AudioManager.Instance.PlaySound(SoundEffect.PlayerActionFailed);
+                }
                 break;
 
             case Toiminto.AvaaLukitus:
@@ -99,6 +112,10 @@ public class DoorController : MonoBehaviour
                 {
                     UnlockDoor();
                     nykyinenTila = OvenTila.Kiinni;
+                }
+                else
+                {
+                    AudioManager.Instance.PlaySound(SoundEffect.PlayerActionFailed);
                 }
                 break;
         }
@@ -152,41 +169,19 @@ public class DoorController : MonoBehaviour
 
     private void OnGUI()
     {
-        if (ShowDebugUI == false)
-        {
-            return;
-        }
+        if (ShowDebugUI == false) return;
 
         GUIStyle buttonStyle = GUI.skin.GetStyle("button");
         GUIStyle labelStyle = GUI.skin.GetStyle("label");
         buttonStyle.fontSize = DebugFontSize;
         labelStyle.fontSize = DebugFontSize;
-
         Rect guiRect = GetGuiRect();
         GUILayout.BeginArea(guiRect);
-
         GUILayout.Label("Door");
-
-        if (GUILayout.Button("Open"))
-        {
-            ReceiveAction(Toiminto.Avaa);
-        }
-
-        if (GUILayout.Button("Close"))
-        {
-            ReceiveAction(Toiminto.Sulje);
-        }
-
-        if (GUILayout.Button("Lock"))
-        {
-            ReceiveAction(Toiminto.Lukitse);
-        }
-
-        if (GUILayout.Button("Unlock"))
-        {
-            ReceiveAction(Toiminto.AvaaLukitus);
-        }
-
+        if (GUILayout.Button("Open")) OpenDoor();
+        if (GUILayout.Button("Close")) CloseDoor();
+        if (GUILayout.Button("Lock")) LockDoor();
+        if (GUILayout.Button("Unlock")) UnlockDoor();
         GUILayout.EndArea();
     }
 
