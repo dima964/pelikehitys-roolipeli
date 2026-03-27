@@ -1,2 +1,17 @@
 fileFormatVersion: 2
 guid: bf6448ef66f516e4d923acd352e6adb5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - playerHitWall: {instanceID: 0}
+  - playerOpenDoor: {instanceID: 0}
+  - playerFoundMerchant: {instanceID: 0}
+  - playerPurchase: {instanceID: 0}
+  - playerActionFailed: {fileID: 8300000, guid: b17491a89c458144a987315b8ab158a1, type: 3}
+  - backgroundMusic: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

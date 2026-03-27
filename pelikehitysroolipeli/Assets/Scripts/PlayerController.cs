@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -7,10 +6,11 @@ public class PlayerController : MonoBehaviour
 {
     Vector2 lastMovement;
     Rigidbody2D rb;
-    [SerializeField]
-    float moveSpeed;
+
+    [SerializeField] float moveSpeed;
 
     [SerializeField] GameObject doorButtonsParent;
+    [SerializeField] UnityEngine.UI.Text inventoryText; // 👈 UI for inventory
 
     Button openButton;
     Button closeButton;
@@ -19,12 +19,13 @@ public class PlayerController : MonoBehaviour
 
     DoorController currentDoor;
 
+    Inventory inventory = new Inventory(); // 👈 NEW
+
     void Start()
     {
         lastMovement = Vector2.zero;
         rb = GetComponent<Rigidbody2D>();
 
-        // 🔹 Hae napit vanhemman kautta (EI GameObject.Find piilotetuille)
         openButton = doorButtonsParent.transform.Find("OpenButton").GetComponent<Button>();
         closeButton = doorButtonsParent.transform.Find("CloseButton").GetComponent<Button>();
         lockButton = doorButtonsParent.transform.Find("LockButton").GetComponent<Button>();
@@ -35,7 +36,6 @@ public class PlayerController : MonoBehaviour
         lockButton.onClick.AddListener(OnLockButton);
         unlockButton.onClick.AddListener(OnUnlockButton);
 
-        // 🔹 Piilota napit alussa
         doorButtonsParent.SetActive(false);
     }
 
@@ -65,18 +65,14 @@ public class PlayerController : MonoBehaviour
             currentDoor.ReceiveAction(DoorController.Toiminto.AvaaLukitus);
     }
 
-    void Update()
-    {
-
-    }
-
     private void FixedUpdate()
     {
         rb.MovePosition(rb.position + lastMovement * moveSpeed * Time.fixedDeltaTime);
     }
-    private void OnCollisionEnter2D(Collision2D collsion)
+
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collsion.gameObject.CompareTag("Wall"))
+        if (collision.gameObject.CompareTag("Wall"))
         {
             AudioManager.Instance.PlaySound(SoundEffect.PlayerHitWall);
         }
@@ -84,19 +80,48 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Huomaa mitä pelaaja löytää
+        // 🚪 Door
         if (collision.CompareTag("Door"))
         {
             UnityEngine.Debug.Log("Found Door");
 
             currentDoor = collision.GetComponent<DoorController>();
-
-            
             doorButtonsParent.SetActive(true);
         }
+
+        // 🧍 Merchant
         else if (collision.CompareTag("Merchant"))
         {
             AudioManager.Instance.PlaySound(SoundEffect.PlayerFoundMerchant);
+        }
+
+        // 🎒 ITEM SYSTEM (NEW)
+        else if (collision.CompareTag("Item"))
+        {
+            Tavara item = collision.GetComponent<Tavara>();
+
+            if (item != null)
+            {
+                UnityEngine.Debug.Log("Player found item: " + item.Name);
+
+                Tavara copy = item.MakeCopy();
+
+                bool success = inventory.AddItem(copy);
+
+                if (success)
+                {
+                    Destroy(collision.gameObject);
+                    UpdateInventoryUI();
+                }
+                else
+                {
+                    UnityEngine.Debug.Log("Inventory is full!");
+                }
+            }
+            else
+            {
+                UnityEngine.Debug.LogWarning("Item tag found but no Tavara component!");
+            }
         }
     }
 
@@ -111,7 +136,18 @@ public class PlayerController : MonoBehaviour
 
     void OnMoveAction(InputValue value)
     {
-        Vector2 v = value.Get<Vector2>();
-        lastMovement = v;
+        lastMovement = value.Get<Vector2>();
+    }
+
+    void UpdateInventoryUI()
+    {
+        if (inventoryText == null) return;
+
+        inventoryText.text = "";
+
+        foreach (Tavara item in inventory.Items)
+        {
+            inventoryText.text += item.Name + "\n";
+        }
     }
 }
